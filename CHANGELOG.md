@@ -25,3 +25,6 @@ Synced docs were read-only so only the first food logged; now cloned. Serving ed
 
 ## v8: Apple-style redesign
 iOS system font, colors and grouped cards, frosted tab bar with icons, activity rings for calories/protein/steps.
+
+## v9: Eaten / Left toggle
+Segmented control to show calories and macros eaten or remaining, with overage in red.
