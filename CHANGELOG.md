@@ -19,3 +19,6 @@ Claude reads sleep hours, score, resting HR and HRV from RingConn screenshots.
 
 ## v6: Lifting days Sat/Mon/Tue/Fri
 Tappable week planner, rotation projected onto planned days, "already trained today" option.
+
+## v7: Fix food logging, add serving sizes
+Synced docs were read-only so only the first food logged; now cloned. Serving editor with servings/g/oz/ml/cups/tbsp and live macros.
