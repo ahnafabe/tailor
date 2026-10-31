@@ -22,3 +22,6 @@ Tappable week planner, rotation projected onto planned days, "already trained to
 
 ## v7: Fix food logging, add serving sizes
 Synced docs were read-only so only the first food logged; now cloned. Serving editor with servings/g/oz/ml/cups/tbsp and live macros.
+
+## v8: Apple-style redesign
+iOS system font, colors and grouped cards, frosted tab bar with icons, activity rings for calories/protein/steps.
