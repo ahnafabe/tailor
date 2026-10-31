@@ -31,3 +31,6 @@ Segmented control to show calories and macros eaten or remaining, with overage i
 
 ## v10: Exercise guides
 Animated range-of-motion figures, front/back muscle maps, form cues and video links for every lift.
+
+## v11: Guides for primer and wrist work
+Hand/forearm close-up figures and forearm map with median nerve for wrist exercises; body guides for posture primer.
