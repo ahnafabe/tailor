@@ -16,3 +16,6 @@ Separate L/R weights and progression, iso-lateral pressing, pec deck; progress p
 
 ## v5: Read RingConn screenshots
 Claude reads sleep hours, score, resting HR and HRV from RingConn screenshots.
+
+## v6: Lifting days Sat/Mon/Tue/Fri
+Tappable week planner, rotation projected onto planned days, "already trained today" option.
