@@ -7,3 +7,6 @@ Daily wrist mobility checklist, pain traffic-light, weekly left-vs-right range/g
 
 ## v2: Rebuild as all-in-one fitness app
 4-session lifting rotation with double progression and 15-min wrist finisher; adaptive TDEE and macros; food log with Claude estimates, barcode and label scanning; weight trend.
+
+## v3: Personal targets, posture and goal tracker
+Profile set to 25/M/5'10"/240.8 lb, goal 215 lb by Dec 15; protein from goal weight; posture primer, extra left-side sets, core work; goal projection and steps.
