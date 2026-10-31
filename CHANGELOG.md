@@ -10,3 +10,6 @@ Daily wrist mobility checklist, pain traffic-light, weekly left-vs-right range/g
 
 ## v3: Personal targets, posture and goal tracker
 Profile set to 25/M/5'10"/240.8 lb, goal 215 lb by Dec 15; protein from goal weight; posture primer, extra left-side sets, core work; goal projection and steps.
+
+## v4: Per-side weights, Progress tab, sleep log
+Separate L/R weights and progression, iso-lateral pressing, pec deck; progress photos, strength and balance charts, measurements; sleep entry and sleep-vs-performance table.
