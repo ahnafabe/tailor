@@ -28,3 +28,6 @@ iOS system font, colors and grouped cards, frosted tab bar with icons, activity 
 
 ## v9: Eaten / Left toggle
 Segmented control to show calories and macros eaten or remaining, with overage in red.
+
+## v10: Exercise guides
+Animated range-of-motion figures, front/back muscle maps, form cues and video links for every lift.
