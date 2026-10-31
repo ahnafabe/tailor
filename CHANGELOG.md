@@ -13,3 +13,6 @@ Profile set to 25/M/5'10"/240.8 lb, goal 215 lb by Dec 15; protein from goal wei
 
 ## v4: Per-side weights, Progress tab, sleep log
 Separate L/R weights and progression, iso-lateral pressing, pec deck; progress photos, strength and balance charts, measurements; sleep entry and sleep-vs-performance table.
+
+## v5: Read RingConn screenshots
+Claude reads sleep hours, score, resting HR and HRV from RingConn screenshots.
