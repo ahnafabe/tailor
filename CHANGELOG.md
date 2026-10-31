@@ -34,3 +34,6 @@ Animated range-of-motion figures, front/back muscle maps, form cues and video li
 
 ## v11: Guides for primer and wrist work
 Hand/forearm close-up figures and forearm map with median nerve for wrist exercises; body guides for posture primer.
+
+## v12: Creatine tracking
+Daily creatine check with streak and water-weight note; creatine start marker on weight chart.
