@@ -37,3 +37,6 @@ Hand/forearm close-up figures and forearm map with median nerve for wrist exerci
 
 ## v12: Creatine tracking
 Daily creatine check with streak and water-weight note; creatine start marker on weight chart.
+
+## v13: Daily home wrist routine
+Wrist work moved out of the gym into a 15-min home routine using thera-bands, plates and grip trainer; alternating strength and mobility days.
