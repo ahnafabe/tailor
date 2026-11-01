@@ -1,4 +1,4 @@
-<title>Ahnaf Fit</title>
+<title>Tailor</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <style>
 /* Layout: iOS-style grouped list — large title, inset grouped cards on a system-gray ground, frosted tab bar with icons. Activity rings for the day's core numbers. */
@@ -142,7 +142,7 @@ th{font-size:13px;font-weight:600;color:var(--muted)}
 
 <div class="wrap">
   <header>
-    <div><div class="tag" id="hdrDate"></div><h1>Ahnaf Fit</h1></div>
+    <div><div class="tag" id="hdrDate"></div><h1>Tailor</h1><div class="sub" style="font-size:15px;margin-top:2px">Fitness and wellbeing, made to measure</div></div>
     <div class="tag" id="syncState">Loading…</div>
   </header>
 
@@ -159,7 +159,7 @@ th{font-size:13px;font-weight:600;color:var(--muted)}
     </div>
     <button class="sosbar" id="tSos" type="button"><span>About to give in?</span><small>Your reasons, your proof, and a 10-minute plan</small></button>
     <div class="panel">
-      <div class="row between"><h3>Last 3 days</h3><span class="pill" id="rcPill"></span></div>
+      <div class="row between"><h3>Fitting · last 3 days</h3><span class="pill" id="rcPill"></span></div>
       <div id="rcBody"></div>
       <div class="row"><button class="btn small ghost" id="rcCoach">Get coach notes</button></div>
       <div id="rcNotes" class="howfeel"></div>
@@ -698,7 +698,7 @@ function renderSleep(){
   rows.forEach(([lab,f,fm])=>{const a=stat(grp.short,f),b=stat(grp.good,f);if(a==null&&b==null)return;t.append(el("tr",{},el("td",{},lab),el("td",{},a==null?"–":fm(a)),el("td",{},b==null?"–":fm(b))))});
   $("#slNote").textContent="Averages for the day following each night. A few weeks of data makes the comparison more reliable.";
 }
-function carryNote(elm,tg){if(!elm)return;if(tg&&tg.carry>0){elm.hidden=false;elm.textContent="−"+tg.carry+" kcal today from yesterday's overage (−"+tg.carryC+" g carbs"+(tg.carryF?", −"+tg.carryF+" g fat":"")+")"+(tg.over>tg.carry?". The rest ("+(tg.over-tg.carry)+" kcal) was dropped to keep today realistic":"")+".";}else elm.hidden=true}
+function carryNote(elm,tg){if(!elm)return;if(tg&&tg.carry>0){elm.hidden=false;elm.textContent="Alteration: −"+tg.carry+" kcal today from yesterday's overage (−"+tg.carryC+" g carbs"+(tg.carryF?", −"+tg.carryF+" g fat":"")+")"+(tg.over>tg.carry?". The rest ("+(tg.over-tg.carry)+" kcal) was dropped to keep today realistic":"")+".";}else elm.hidden=true}
 function recapData(){const out=[];for(let i=1;i<=3;i++){const d=new Date();d.setDate(d.getDate()-i);const k=dkey(d),r=S.days[k]||{},tg=dayTargets(k),t=totals(r.items||[]),w=S.wos[k];
   const st=HOME[wristType(k)].steps.length;out.push({k,d,tg,t,logged:t.kcal>800,steps:r.steps||null,weight:r.weightKg?wOut(r.weightKg):null,sleep:r.sleepH||null,work:w&&w.done?(w.external?"Trained":SESS[w.session].n):null,wrist:r.wrist?r.wrist.length+"/"+st:null,creatine:!!r.creatine})}return out}
 function renderRecap(){
@@ -1122,7 +1122,7 @@ async function talk(note,out){
   const st=promiseStats(),L=learned(),tg=dayTargets(today()),t=totals(dayRec(today()).items||[]);
   const ctx={situation:sosType==="food"?"wants to eat off-plan":"wants to skip today's workout",theirWords:note||null,time:new Date().toLocaleString(),whys:whys(),promisesKept:st.kept+"/"+st.made,workouts:st.wDone+"/"+st.wPlan,trendLost:st.lost+" "+wU(),kcalLeftToday:tg?Math.max(0,tg.kcal-Math.round(t.kcal)):null,proteinLeft:tg?Math.max(0,tg.pro-Math.round(t.p)):null,todaysSession:SESS[nextSession()].n,pastMoments:L?L.recent.map(m=>({type:m.type,outcome:m.outcome,note:m.note})):[]};
   out.textContent="…";
-  try{const r=await sample("You are Ahnaf's accountability coach inside his fitness app. He is cutting from about 240 lb toward 215 lb, lifting 4 days a week and rehabbing his left wrist. Right now he is about to give in. Context: "+JSON.stringify(ctx)+". Speak to him directly in second person, under 80 words. Use his own reasons, quoting one exactly. Be firm and warm, never shaming. If he has a real reason (injury, illness, wrist pain at 6/10 or more), tell him rest is the right call. End with one concrete thing to do in the next 10 minutes. Plain text.",{modelTier:"quick",cache:false,onText:({text})=>{out.textContent=text}});out.textContent=r.text}
+  try{const r=await sample("You are Ahnaf's accountability coach inside Tailor, his fitness and wellbeing app. He is cutting from about 240 lb toward 215 lb, lifting 4 days a week and rehabbing his left wrist. Right now he is about to give in. Context: "+JSON.stringify(ctx)+". Speak to him directly in second person, under 80 words. Use his own reasons, quoting one exactly. Be firm and warm, never shaming. If he has a real reason (injury, illness, wrist pain at 6/10 or more), tell him rest is the right call. End with one concrete thing to do in the next 10 minutes. Plain text.",{modelTier:"quick",cache:false,onText:({text})=>{out.textContent=text}});out.textContent=r.text}
   catch(e){out.textContent=e&&e.code==="rate_limited"?"Too many requests. Try again in a minute.":"Couldn't reach Claude right now. Read your reasons above and give it 10 minutes."}
 }
 function openSos(type){sosType=type;whyIdx=Math.floor(Math.random()*whys().length);const t=$("#sosMsg2");if(t)t.hidden=true;go("why");renderSos();const b=$("#sosBody");if(b)b.scrollIntoView({block:"start"})}

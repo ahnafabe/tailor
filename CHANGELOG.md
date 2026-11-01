@@ -46,3 +46,6 @@ Yesterday's overage comes off today's carbs/fat (max 500 kcal, floor 1,600, prot
 
 ## v15: Motivation (Why) tab
 About-to-give-in flow with personal reasons, promises-kept proof, craving timer, goal picture, moment logging and pattern tips.
+
+## v16: Rebrand to Tailor
+Renamed the app Tailor with the subtitle "Fitness and wellbeing, made to measure"; calorie carry-over shown as an Alteration and the 3-day recap as a Fitting.
