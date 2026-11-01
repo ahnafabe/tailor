@@ -43,3 +43,6 @@ Wrist work moved out of the gym into a 15-min home routine using thera-bands, pl
 
 ## v14: Overeating carry-over and 3-day recap
 Yesterday's overage comes off today's carbs/fat (max 500 kcal, floor 1,600, protein untouched); last-3-days recap and Claude coach notes.
+
+## v15: Motivation (Why) tab
+About-to-give-in flow with personal reasons, promises-kept proof, craving timer, goal picture, moment logging and pattern tips.
