@@ -1469,15 +1469,30 @@ $("#fLabelFile").addEventListener("change",async e=>{
   }catch(err){$("#fStatus").textContent="";sheet({},{title:"Enter label values",barcode:pendingBarcode,note:"Couldn't read that photo. Type the values in instead."})}
 });
 $("#fMealPhotoBtn").addEventListener("click",()=>$("#fMealFile").click());
-$("#fMealFile").addEventListener("change",async e=>{
+let mealPhoto=null,mealPhotoURL=null,mealCtx="";
+$("#fMealFile").addEventListener("change",e=>{
   const file=e.target.files[0];e.target.value="";if(!file)return;
   if(!sample||!sampleImg){$("#fStatus").textContent="Photo estimates aren't available in this view.";return}
-  $("#fStatus").textContent="Looking at your meal…";
-  const extra=$("#fSearch").value.trim();
-  try{const r=await sample.json('Estimate the nutrition of the food in this photo using USDA/Canadian Nutrient File values.'+(extra?' The person adds: "'+extra+'".':'')+' Estimate portion sizes from visual cues. Return ONLY JSON {"items":[{"name":string,"serving":string,"kcal":number,"p":number,"c":number,"f":number}]}.',{images:[file],modelTier:"default"});
-    showEstimates((r&&r.items)||[],"Estimated from your photo");
-  }catch(err){$("#fStatus").textContent="Couldn't estimate that photo. Try describing it instead."}
+  if(mealPhotoURL)URL.revokeObjectURL(mealPhotoURL);mealPhoto=file;mealPhotoURL=URL.createObjectURL(file);mealCtx=$("#fSearch").value.trim();
+  mealPhotoSheet();
 });
+function mealPhotoSheet(){
+  const host=$("#fSheet");host.innerHTML="";
+  const ta=el("textarea",{id:"mpCtx",rows:"3",placeholder:"e.g. only ate about half, no skin, the 3 pieces were from one chicken leg, cooked in 1 tbsp oil"});ta.value=mealCtx;
+  const go=el("button",{class:"btn",onclick:()=>{mealCtx=ta.value.trim();estimateMealPhoto()}},"Estimate");
+  host.append(el("div",{class:"sheet"},el("h3",{},"Photo of meal"),
+    el("img",{src:mealPhotoURL,alt:"Your meal photo",style:"width:100%;max-height:260px;object-fit:cover;border-radius:10px"}),
+    el("label",{for:"mpCtx"},"Add context (optional): what's in it, how much you ate, how it was cooked",ta),
+    el("div",{class:"row"},go,el("button",{class:"btn ghost",onclick:()=>{host.innerHTML=""}},"Cancel"))));
+  host.scrollIntoView({block:"nearest"});ta.focus();
+}
+async function estimateMealPhoto(){
+  if(!mealPhoto)return;$("#fSheet").innerHTML="";$("#fStatus").textContent="Looking at your meal…";$("#fResults").innerHTML="";
+  try{const r=await sample.json('Estimate the nutrition of the food in this photo using USDA/Canadian Nutrient File values. Estimate portion sizes from visual cues (plate size, utensils, hands).'+(mealCtx?' The person who ate it adds this context, which overrides what the photo suggests (portion eaten, ingredients, skin removed, cooking method): "'+mealCtx.replace(/"/g,"'")+'".':'')+' Return ONLY JSON {"items":[{"name":string,"serving":string (amount actually eaten, e.g. "about 60 g"),"grams":number,"kcal":number,"p":number,"c":number,"f":number}]} with values for the amount actually eaten.',{images:[mealPhoto],modelTier:"default"});
+    showEstimates((r&&r.items)||[],"Estimated from your photo"+(mealCtx?" and your notes":""));
+    $("#fResults").append(el("button",{class:"btn small ghost",onclick:mealPhotoSheet},"Not right? Add more context and re-estimate"));
+  }catch(err){$("#fStatus").textContent="Couldn't estimate that photo. Try describing it instead."}
+}
 
 /* ================= Body ================= */
 function renderBody(){

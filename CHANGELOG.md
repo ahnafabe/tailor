@@ -52,3 +52,6 @@ Renamed the app Tailor with the subtitle "Fitness and wellbeing, made to measure
 
 ## v17: Weekly plan, volume tracking, training blocks, optional arm day
 This Week view of remaining sessions; per-muscle weekly set tracker against cut targets; added lateral raises, hammer curls, triceps and a second calf day without removing anything; optional arm day outside the rotation; 5-week blocks (4 build + deload) with set ramp in weeks 3-4, stall detection, early-deload advice, exercise swaps and accessory rotation.
+
+## v18: Context for meal photo estimates
+Choosing a meal photo now opens a preview with a text box for context (portion eaten, skin removed, cooking method) that Claude uses over what the photo suggests; results offer a re-estimate with more context.
