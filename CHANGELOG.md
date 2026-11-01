@@ -49,3 +49,6 @@ About-to-give-in flow with personal reasons, promises-kept proof, craving timer,
 
 ## v16: Rebrand to Tailor
 Renamed the app Tailor with the subtitle "Fitness and wellbeing, made to measure"; calorie carry-over shown as an Alteration and the 3-day recap as a Fitting.
+
+## v17: Weekly plan, volume tracking, training blocks, optional arm day
+This Week view of remaining sessions; per-muscle weekly set tracker against cut targets; added lateral raises, hammer curls, triceps and a second calf day without removing anything; optional arm day outside the rotation; 5-week blocks (4 build + deload) with set ramp in weeks 3-4, stall detection, early-deload advice, exercise swaps and accessory rotation.
