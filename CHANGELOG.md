@@ -40,3 +40,6 @@ Daily creatine check with streak and water-weight note; creatine start marker on
 
 ## v13: Daily home wrist routine
 Wrist work moved out of the gym into a 15-min home routine using thera-bands, plates and grip trainer; alternating strength and mobility days.
+
+## v14: Overeating carry-over and 3-day recap
+Yesterday's overage comes off today's carbs/fat (max 500 kcal, floor 1,600, protein untouched); last-3-days recap and Claude coach notes.
