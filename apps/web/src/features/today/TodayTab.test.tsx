@@ -11,8 +11,8 @@ test("rings show eaten vs. target, and the Eaten/Left switch persists to the pro
   const store = new MemoryStore({ ["day-" + today()]: { items: [{ name: "x", kcal: 600, p: 50, c: 60, f: 20, q: 1 }], steps: 4000 } });
   render(<AppProviders store={store} ai={new FakeAiClient()}><TodayTab onLogFood={() => {}} /></AppProviders>);
   const legend = await screen.findByTestId("ring-legend");
-  expect(legend).toHaveTextContent("600/ 2,090 kcal");
-  expect(legend).toHaveTextContent("4,000/ 9,000");
+  expect(legend).toHaveTextContent("600 / 2,090 kcal");
+  expect(legend).toHaveTextContent("4,000 / 9,000");
 
   await userEvent.setup().click(screen.getByRole("button", { name: "Left" }));
   await waitFor(() => expect(screen.getByTestId("ring-legend")).toHaveTextContent("1,490 kcal left"));
