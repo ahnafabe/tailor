@@ -58,3 +58,6 @@ Choosing a meal photo now opens a preview with a text box for context (portion e
 
 ## v19: TypeScript core package, tests and build pipeline
 Moved calorie, carry-over, training-block, stall, plan and progression logic into @tailor/core (strict TypeScript, 33 unit tests). The app now runs on the bundled core. AI food estimates are validated with zod. Fixed a date bug in the adaptive-burn window found by the new tests. Added esbuild build, Playwright smoke and parity tests, and GitHub Actions CI.
+
+## v20: React app foundation (Today and Food tabs)
+Vite + React 19 + TypeScript + TanStack Query app in apps/web with Store and AiClient adapters, optimistic writes and live sync. Today (rings, eaten/left, alterations, macros) and Food (search, Claude estimates with validation, serving editor) ported with Vitest + Testing Library tests. Serving-size math moved into core. Original UI moved to apps/legacy and remains the published app until React reaches parity.

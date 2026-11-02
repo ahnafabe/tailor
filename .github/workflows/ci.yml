@@ -14,7 +14,10 @@ jobs:
       - run: npm test
       - run: npm run build
       - run: npm run e2e
+      - run: node tests/e2e/react-smoke.mjs dist/react.html
       - uses: actions/upload-artifact@v4
         with:
           name: tailor-build
-          path: dist/index.html
+          path: |
+            dist/index.html
+            dist/react.html
