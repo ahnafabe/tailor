@@ -1,4 +1,4 @@
-import { test } from "node:test";
+import { test } from "vitest";
 import assert from "node:assert/strict";
 import { dayTargets, targets, totals, CARRY_CAP, KCAL_FLOOR, addDays, weekMon } from "../src";
 import { food, profile, state } from "./helpers";

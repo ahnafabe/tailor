@@ -5,3 +5,4 @@ export * from "./nutrition";
 export * from "./energy";
 export * from "./targets";
 export * from "./training";
+export * from "./servings";
