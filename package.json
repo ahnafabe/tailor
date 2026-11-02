@@ -1,0 +1,21 @@
+{
+  "name": "tailor",
+  "private": true,
+  "description": "Tailor: fitness and wellbeing, made to measure",
+  "workspaces": ["packages/*"],
+  "type": "module",
+  "scripts": {
+    "test": "tsx --test packages/core/test/*.test.ts",
+    "typecheck": "tsc -p packages/core --noEmit",
+    "build": "node scripts/build.mjs",
+    "e2e": "node tests/e2e/run.mjs",
+    "check": "npm run typecheck && npm test && npm run build && npm run e2e"
+  },
+  "devDependencies": {
+    "esbuild": "^0.28.2",
+    "playwright": "^1.56.0",
+    "tsx": "^4.20.0",
+    "typescript": "^6.0.0",
+    "@types/node": "^22.0.0"
+  }
+}

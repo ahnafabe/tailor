@@ -55,3 +55,6 @@ This Week view of remaining sessions; per-muscle weekly set tracker against cut 
 
 ## v18: Context for meal photo estimates
 Choosing a meal photo now opens a preview with a text box for context (portion eaten, skin removed, cooking method) that Claude uses over what the photo suggests; results offer a re-estimate with more context.
+
+## v19: TypeScript core package, tests and build pipeline
+Moved calorie, carry-over, training-block, stall, plan and progression logic into @tailor/core (strict TypeScript, 33 unit tests). The app now runs on the bundled core. AI food estimates are validated with zod. Fixed a date bug in the adaptive-burn window found by the new tests. Added esbuild build, Playwright smoke and parity tests, and GitHub Actions CI.
