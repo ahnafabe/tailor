@@ -28,6 +28,32 @@ await step("change a serving to grams", async () => {
   await p.click('#fLog button:has-text("Save amount")'); await p.waitForTimeout(150);
   assert.match(await p.locator("#fLog .item", { hasText: "Chicken" }).textContent(), /250 g · 413 kcal/);
 });
+await step("food catalogue remembers foods and re-adds the last amount", async () => {
+  assert.match(await p.textContent("#catCount"), /4 foods/); // 3 logged today + 1 from yesterday
+  await p.locator("#catList .cand", { hasText: "Chicken" }).locator("button.btn").click(); await p.waitForTimeout(150);
+  assert.equal(await p.locator("#fLog .item", { hasText: "250 g · 413 kcal" }).count(), 2);
+  await p.fill("#fSearch", ""); await p.dispatchEvent("#fSearch", "input");
+  assert.match(await p.textContent("#fResults"), /Last time: 250 g/);
+});
+await step("step back to yesterday and mark it partly logged", async () => {
+  await p.click("#fPrev"); assert.match(await p.textContent("#fDayLab"), /Yesterday/);
+  assert.equal(await p.locator("#fLog .item").count(), 1);
+  await p.check("#fPartial"); await p.waitForTimeout(150);
+  assert.match(await p.textContent("#fPartialNote"), /left out of your averages/);
+  assert.match(await p.textContent("#rcBody"), /Partial · 2,900\+/);
+  assert.match(await p.textContent("#tCarry"), /−490 kcal/); // logged food is a minimum, so the overage still counts
+  await p.click("#fToday"); assert.equal(await p.isHidden("#fPastBar"), true);
+});
+await step("edit a past day from Progress", async () => {
+  await p.click("nav.tabs button[data-tab=body]");
+  assert.ok((await p.locator("#hiList > .item").count()) >= 2);
+  await p.locator("#hiList > .item").nth(1).click();
+  await p.fill("#hd-s", "8000"); await p.click('#hiList button:has-text("Save")'); await p.waitForTimeout(150);
+  assert.match(await p.locator("#hiList > .item").nth(1).textContent(), /8,000 steps/);
+  await p.locator("#hiList > .item").first().click(); await p.click('#hiList button:has-text("Open food log")');
+  assert.equal(await p.isVisible("#tab-food"), true); assert.match(await p.textContent("#fDayLab"), /Yesterday/);
+  await p.click("#fToday");
+});
 await step("AI estimate goes through validation", async () => {
   await p.fill("#fSearch", "chicken and rice"); await p.click("#fAsk"); await p.waitForTimeout(150);
   assert.equal(await p.locator("#fResults .cand").count(), 2);

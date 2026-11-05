@@ -61,3 +61,9 @@ Moved calorie, carry-over, training-block, stall, plan and progression logic int
 
 ## v20: React app foundation (Today and Food tabs)
 Vite + React 19 + TypeScript + TanStack Query app in apps/web with Store and AiClient adapters, optimistic writes and live sync. Today (rings, eaten/left, alterations, macros) and Food (search, Claude estimates with validation, serving editor) ported with Vitest + Testing Library tests. Serving-size math moved into core. Original UI moved to apps/legacy and remains the published app until React reaches parity.
+
+## v21: Partial days, past-day editing, food catalogue
+- **"I didn't log everything this day"** toggle on the Food tab. Partial days are left out of the burn estimate, recap score, streaks and sleep comparison, because a half-logged day looks like a deficit that never happened. Overage on a partial day still carries over (what was logged is a minimum). Past days that look light get a nudge to mark them.
+- **Past days**: ‹ › day stepping and "Back to today" on the Food tab; a Past days list on Progress to fix weight, steps, sleep, creatine and the partial flag for any earlier day, or jump to that day's food log. Recap links to it.
+- **My foods catalogue**: every food ever logged is rebuilt from history (`foodCatalog` in core, a pure function, so no data migration), merged with saved foods, one entry per name. Add re-logs the amount you had last time; edit and remove only affect future logs. Search ranks your own foods before staples.
+- Core: `log.ts` (`countsAsLogged`, `foodCatalog`, `searchCatalog`, `foodKey`) with 6 new tests (44 total); `adaptive` skips partial days. Smoke tests cover all three features; parity with v20 unchanged.
