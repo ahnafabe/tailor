@@ -23,6 +23,7 @@ export interface DayLog {
   weightKg?: number | null;
   steps?: number | null;
   sleepH?: number | null;
+  partial?: boolean; // user marked: didn't log everything eaten this day
   [extra: string]: unknown;
 }
 

@@ -1,5 +1,6 @@
 import { addDays } from "./dates";
 import { totals } from "./nutrition";
+import { countsAsLogged } from "./log";
 import type { AppState, DateKey, DayLog } from "./types";
 
 export const KCAL_PER_KG = 7700;
@@ -54,10 +55,7 @@ export function adaptive(s: Pick<AppState, "days">): Adaptive | null {
   const intake: number[] = [];
   for (let k = win[0].k; k <= end; k = addDays(k, 1)) {
     const r = s.days[k];
-    if (r) {
-      const kc = totals(r.items).kcal;
-      if (kc > 800) intake.push(kc);
-    }
+    if (countsAsLogged(r)) intake.push(totals(r!.items).kcal); // skips partial and barely-logged days
   }
   if (intake.length < 10) return null;
   const avg = intake.reduce((a, b) => a + b, 0) / intake.length;

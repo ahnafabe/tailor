@@ -1,6 +1,7 @@
 import { prevKey } from "./dates";
 import { adaptive, currentWeight, formulaTdee, KCAL_PER_KG, type Adaptive } from "./energy";
 import { totals } from "./nutrition";
+import { MIN_LOGGED_KCAL } from "./log";
 import type { AppState, DateKey } from "./types";
 
 export interface Targets {
@@ -31,7 +32,6 @@ export function targets(s: AppState): Targets | null {
 /** Product safety rules for carry-over. */
 export const CARRY_CAP = 500; // max kcal taken off any one day
 export const KCAL_FLOOR = 1600; // never set a day below this
-const MIN_LOGGED_KCAL = 800; // below this a day is treated as not logged
 
 /**
  * Targets for a specific day, with yesterday's overage carried over.
@@ -46,6 +46,7 @@ export function dayTargets(s: AppState, k: DateKey, depth = 3): DayTargets | nul
   const pk = prevKey(k), pr = s.days[pk];
   if (!pr || !pr.items || !pr.items.length) return tg;
   const eaten = totals(pr.items);
+  // A partial day still carries over: what was logged is a minimum, so an overage is real.
   if (eaten.kcal < MIN_LOGGED_KCAL) return tg;
   const pt = dayTargets(s, pk, depth - 1)!;
   const over = Math.round(eaten.kcal - pt.kcal);
