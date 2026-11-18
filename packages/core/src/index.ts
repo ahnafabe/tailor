@@ -7,3 +7,4 @@ export * from "./targets";
 export * from "./training";
 export * from "./servings";
 export * from "./log";
+export * from "./suggest";

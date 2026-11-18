@@ -54,6 +54,24 @@ await step("edit a past day from Progress", async () => {
   assert.equal(await p.isVisible("#tab-food"), true); assert.match(await p.textContent("#fDayLab"), /Yesterday/);
   await p.click("#fToday");
 });
+await step("meal ideas from my foods fit what's left", async () => {
+  assert.match(await p.textContent("#sgLeft"), /kcal · \d+ g protein left|Over by/);
+  const n = await p.locator("#sgBody .idea").count(); assert.ok(n >= 1, "has ideas");
+  const before = await p.locator("#fLog .item").count();
+  await p.locator("#sgBody .idea").first().locator("button.btn").click(); await p.waitForTimeout(200);
+  assert.ok((await p.locator("#fLog .item").count()) > before);
+  await p.click('#sgScope button[data-v="day"]'); assert.equal(await p.getAttribute('#sgScope button[data-v="day"]', "aria-pressed"), "true");
+});
+await step("eating out: halal orders, bad numbers and pork dropped", async () => {
+  await p.click('#sgMode button[data-v="out"]'); assert.equal(await p.isVisible("#sgOut"), true);
+  await p.fill("#sgPlace", "Osmow's"); await p.click("#sgAsk"); await p.waitForTimeout(200);
+  assert.equal(await p.locator("#sgBody .idea").count(), 1);
+  assert.match(await p.textContent("#sgBody"), /Halal certified/);
+  assert.match(await p.textContent("#sgStatus"), /2 suggestions removed/);
+  await p.locator("#sgBody .idea button.btn").click(); await p.waitForTimeout(150);
+  assert.match(await p.textContent("#fLog"), /Osmow's: Chicken on the rocks/);
+  await p.click('#sgMode button[data-v="mine"]'); assert.equal(await p.isHidden("#sgOut"), true);
+});
 await step("AI estimate goes through validation", async () => {
   await p.fill("#fSearch", "chicken and rice"); await p.click("#fAsk"); await p.waitForTimeout(150);
   assert.equal(await p.locator("#fResults .cand").count(), 2);

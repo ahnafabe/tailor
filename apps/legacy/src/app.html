@@ -98,6 +98,8 @@ button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-vis
 .pill{display:inline-block;font:600 13px var(--body);padding:3px 10px;border-radius:99px;background:var(--accent-soft);color:var(--accent)}
 .pill.warn{background:var(--hold-soft);color:var(--hold)}
 .chart svg{display:block;width:100%;height:auto}
+.badge{display:inline-block;font:600 11px var(--body);padding:2px 8px;border-radius:99px;background:var(--fill);color:var(--muted)}.badge.go{background:var(--accent-soft);color:var(--accent)}.badge.hold{background:var(--hold-soft);color:var(--hold)}
+.idea{display:grid;gap:6px;padding:12px;border-radius:12px;background:var(--fill)}.idea ul{margin:0;padding-left:18px;font-size:14px}
 .est{font-size:12px;font-weight:600;color:var(--hold)}
 .sheet{border:0;border-radius:12px;padding:16px;display:grid;gap:12px;background:var(--fill)}
 .cand{display:grid;grid-template-columns:1fr auto;gap:8px;align-items:center;padding:10px 12px;border-radius:10px;background:var(--fill);border:0}
@@ -121,6 +123,7 @@ th{font-size:13px;font-weight:600;color:var(--muted)}
 .howfeel{font-size:15px}
 .howcues{margin:0;padding-left:20px;display:grid;gap:6px;font-size:15px}
 @media (max-width:520px){.howgrid{grid-template-columns:1fr}}
+[hidden]{display:none!important}
 .chk{display:flex;gap:10px;align-items:center;color:var(--ink);font-size:15px}
 .hist .item{cursor:pointer}.hist .item:hover .nm{color:var(--accent)}
 .daynav{display:flex;gap:6px;align-items:center}.daynav .x{padding:6px 11px;font-size:16px;line-height:1}
@@ -247,6 +250,19 @@ th{font-size:13px;font-weight:600;color:var(--muted)}
       <div class="macros" id="fMacros"></div>
       <label class="chk" for="fPartial"><input type="checkbox" id="fPartial">I didn't log everything this day</label>
       <div class="sub" id="fPartialNote" style="font-size:13px"></div>
+    </div>
+    <div class="panel" id="sgPanel">
+      <div class="row between"><h3>What should I eat?</h3><span class="pill" id="sgLeft"></span></div>
+      <div class="row"><div class="seg" role="group" aria-label="Suggestion source" id="sgMode"><button type="button" data-v="mine" aria-pressed="true">My foods</button><button type="button" data-v="out" aria-pressed="false">Eating out</button></div>
+        <div class="seg" role="group" aria-label="How much of what's left" id="sgScope"><button type="button" data-v="meal" aria-pressed="true">Next meal</button><button type="button" data-v="day" aria-pressed="false">Rest of today</button></div></div>
+      <div id="sgOut" hidden style="display:grid;gap:8px">
+        <label for="sgPlace">Where? Leave blank for halal-friendly ideas around <span id="sgArea"></span><input type="text" id="sgPlace" list="sgPlaces" placeholder="e.g. Chipotle, Osmow's, Mary Brown's"></label>
+        <datalist id="sgPlaces"></datalist>
+        <div class="row" id="sgChips"></div>
+        <div class="row"><button class="btn small" id="sgAsk">Suggest orders</button></div>
+      </div>
+      <div class="status" id="sgStatus"></div>
+      <div id="sgBody" style="display:grid;gap:8px"></div>
     </div>
     <div class="panel">
       <h3>Add food</h3>
@@ -420,6 +436,9 @@ th{font-size:13px;font-weight:600;color:var(--muted)}
         <label for="pGoalDate">Goal date<input type="date" id="pGoalDate"></label>
         <label for="pCarry" style="grid-column:1/-1;display:flex;gap:10px;align-items:center;color:var(--ink);font-size:15px"><input type="checkbox" id="pCarry"> Carry overeating into the next day (up to 500 kcal off carbs and fat; protein never drops)</label>
         <label for="pSteps">Daily step goal<input type="number" id="pSteps" inputmode="numeric" step="500"></label>
+        <label for="pHalal" style="grid-column:1/-1;display:flex;gap:10px;align-items:center;color:var(--ink);font-size:15px"><input type="checkbox" id="pHalal"> Halal only (meal ideas and restaurant orders)</label>
+        <label for="pArea">Area for eating out<input type="text" id="pArea" placeholder="e.g. Surrey, BC"></label>
+        <label for="pPlaces" style="grid-column:1/-1">Places you eat at (comma separated)<input type="text" id="pPlaces" placeholder="Chipotle, Osmow's, Mary Brown's"></label>
         <div style="grid-column:1/-1;display:grid;gap:4px"><span class="sub" style="font-size:.82rem">Lifting days (tap to change; 3–4 recommended)</span><div class="week" id="pDayPick"></div></div>
       </div>
       <div class="row"><button class="btn" id="pSave">Save</button><span class="status" id="pStatus"></span></div>
@@ -527,7 +546,7 @@ const STAPLES=[ // per serving, typical values (USDA/CNF)
 ];
 
 /* ================= state & storage ================= */
-const S={profile:{sex:"m",age:25,units:"lb",weightKg:240.8/2.20462,heightCm:177.8,act:1.45,run:80,goal:"cut",rate:-1,goalKg:215/2.20462,goalDate:"2026-12-15",days:4,daysWhich:"Mon Tue Fri Sat",stepGoal:9000,creatineStart:"2026-10-31",blockStart:"2026-10-26"},days:{},wos:{},foods:{},wrist:[],photos:{},meas:[],moments:{}};
+const S={profile:{sex:"m",age:25,units:"lb",weightKg:240.8/2.20462,heightCm:177.8,act:1.45,run:80,goal:"cut",rate:-1,goalKg:215/2.20462,goalDate:"2026-12-15",days:4,daysWhich:"Mon Tue Fri Sat",stepGoal:9000,creatineStart:"2026-10-31",blockStart:"2026-10-26",halal:true,area:"Surrey, BC",places:[]},days:{},wos:{},foods:{},wrist:[],photos:{},meas:[],moments:{}};
 let coll=null, sample=null, sampleImg=false;
 const $=s=>document.querySelector(s);
 const el=(t,a={},...kids)=>{const e=document.createElement(t);for(const k in a){if(k==="class")e.className=a[k];else if(k.startsWith("on"))e.addEventListener(k.slice(2),a[k]);else if(a[k]!=null)e.setAttribute(k,a[k])}kids.flat().forEach(c=>e.append(c instanceof Node?c:document.createTextNode(c??"")));return e};
@@ -1318,7 +1337,7 @@ function renderFood(){
       }
     });
   });
-  searchLib();renderCatalog();
+  searchLib();renderCatalog();renderSuggest();
 }
 /* ---- serving sizes ----
    Nutrition is stored per serving. bq/bu = how much one serving is in grams or ml (when known).
@@ -1414,6 +1433,66 @@ $("#fPrev").addEventListener("click",()=>setFoodDay(prevKey(fKey)));
 $("#fNext").addEventListener("click",()=>setFoodDay(TC.addDays(fKey,1)));
 $("#fToday").addEventListener("click",()=>setFoodDay(today()));
 $("#fPartial").addEventListener("change",async e=>{const r=dayRec(fKey);if(e.target.checked)r.partial=true;else delete r.partial;renderFood();$("#fStatus").textContent=(e.target.checked?"Marked partly logged · ":"Marked fully logged · ")+await save("day-"+fKey,r);renderAll()});
+
+/* ---- "What should I eat?": ideas from my foods (core suggestMeals) or restaurant orders (Claude, validated) ---- */
+let sgMode="mine", sgScope="meal", sgOrders=null, sgKey=null;
+function sgLeftNow(){const tg=dayTargets(fKey);if(!tg)return null;const left=TC.macrosLeft(tg,totals(dayRec(fKey).items));
+  const budget=sgScope==="meal"?Math.round(left.kcal/TC.mealsLeft(new Date().getHours())):left.kcal;return {left,budget}}
+const portionLab=x=>x.food.bq&&x.food.bu?Math.round(x.q*x.food.bq)+" "+x.food.bu+" "+x.food.name:(x.q===1?"":r1(x.q)+" × ")+x.food.name+(x.food.serving?" ("+x.food.serving+")":"");
+function logIdea(i){i.portions.forEach(x=>addItem(x.food,x.q,!!x.food.est,x.food.bq&&x.food.bu==="g"?{amt:Math.round(x.q*x.food.bq),unit:"g"}:x.food.bq&&x.food.bu==="ml"?{amt:Math.round(x.q*x.food.bq),unit:"ml"}:{amt:x.q,unit:"srv"}));$("#sgStatus").textContent="Logged to "+$("#fMeal").value+"."}
+function renderSuggest(){
+  const pan=$("#sgPanel");if(!pan)return;pan.hidden=fKey!==today();if(pan.hidden)return;
+  ["#sgMode","#sgScope"].forEach(id=>$(id).querySelectorAll("button").forEach(b=>b.setAttribute("aria-pressed",String(b.dataset.v===(id==="#sgMode"?sgMode:sgScope)))));
+  const L=sgLeftNow(),host=$("#sgBody");host.innerHTML="";$("#sgOut").hidden=sgMode!=="out";
+  if(!L){$("#sgLeft").textContent="";host.append(el("p",{class:"sub"},"Set up your profile on Me to get targets first."));return}
+  const {left,budget}=L;$("#sgLeft").textContent=left.kcal>=0?left.kcal.toLocaleString()+" kcal · "+Math.max(0,left.p)+" g protein left":"Over by "+(-left.kcal)+" kcal";
+  const halal=S.profile.halal!==false;
+  if(sgMode==="mine"){
+    const foods=catalog().concat(STAPLES.map(([n,sv,k,p,c,f],i)=>({id:"st"+i,name:n,serving:sv,kcal:k,p,c,f,staple:true,count:0,bq:(String(sv).match(/^(\d+) ?g$/)||[])[1]?+String(sv).match(/^(\d+) ?g$/)[1]:null,bu:/^\d+ ?g$/.test(sv)?"g":null})));
+    const r=TC.suggestMeals(foods,left,{budget,halal});
+    if(r.mode==="none"){host.append(el("p",{class:"sub"},"You're at your targets for today. Water, tea or a walk are your friends now."));return}
+    host.append(el("p",{class:"sub",style:"font-size:13px"},r.mode==="light"?"You're at or over calories but still short on protein. A small high-protein option beats going to bed hungry:":"Built from foods you eat, for up to "+r.budget.toLocaleString()+" kcal"+(sgScope==="meal"?" (your next meal's share)":"")+". Protein first."+(halal?" Halal only.":"")));
+    if(!r.ideas.length)host.append(el("p",{class:"sub"},"Log a few more foods and ideas will show up here."));
+    r.ideas.forEach(i=>host.append(el("div",{class:"idea"},el("ul",{},i.portions.map(x=>el("li",{},portionLab(x)))),
+      el("div",{class:"row between"},el("span",{class:"num",style:"font-size:13px;color:var(--muted)"},i.kcal+" kcal · P"+i.p+" C"+i.c+" F"+i.f),el("button",{class:"btn small",onclick:()=>logIdea(i)},"Log this")))));
+  }else{
+    $("#sgArea").textContent=S.profile.area||"you";
+    const pl=S.profile.places||[],dl=$("#sgPlaces"),ch=$("#sgChips");dl.innerHTML="";ch.innerHTML="";
+    pl.forEach(x=>{dl.append(el("option",{value:x}));ch.append(el("button",{class:"x",type:"button",onclick:()=>{$("#sgPlace").value=x;askOrders()}},x))});
+    if(sgOrders&&sgKey===budget+"|"+halal)renderOrders(sgOrders);
+  }
+}
+function renderOrders(list){const host=$("#sgBody");
+  const hb={certified:["Halal certified","go"],options:["Halal options","go"],unclear:["Check halal","hold"],no:["Not halal","hold"]};
+  list.forEach(o=>{const [hl,hc]=hb[o.halal]||hb.unclear;host.append(el("div",{class:"idea"},
+    el("div",{class:"row between"},el("b",{},o.place),el("span",{class:"badge "+hc},hl)),
+    el("div",{},o.order),o.mods.length?el("ul",{},o.mods.map(m=>el("li",{},m))):"",
+    o.halalNote?el("div",{class:"sub",style:"font-size:12px"},o.halalNote):"",
+    el("div",{class:"row between"},el("span",{class:"num",style:"font-size:13px;color:var(--muted)"},"≈ "+Math.round(o.kcal)+" kcal · P"+Math.round(o.p)+" C"+Math.round(o.c)+" F"+Math.round(o.f)+(o.confidence!=="high"?" · "+o.confidence+" confidence":"")),
+      el("div",{class:"row"},(S.profile.places||[]).includes(o.place)?"":el("button",{class:"x",onclick:async()=>{S.profile.places=[...(S.profile.places||[]),o.place];await save("profile",S.profile);renderSuggest()}},"Save place"),
+        el("button",{class:"btn small",onclick:()=>{addItem({name:o.place+": "+o.order,serving:"1 order",kcal:o.kcal,p:o.p,c:o.c,f:o.f},1,true);$("#sgStatus").textContent="Logged "+o.place+" as an estimate."}},"Log this")))))});
+}
+async function askOrders(){
+  const st=$("#sgStatus");if(!sample){st.textContent="Restaurant ideas aren't available in this view.";return}
+  const L=sgLeftNow();if(!L)return;let {left,budget}=L;const light=budget<200;if(light)budget=250;
+  const halal=S.profile.halal!==false,place=$("#sgPlace").value.trim(),area=S.profile.area||"Metro Vancouver, BC";
+  st.textContent="Finding orders…";$("#sgBody").innerHTML="";
+  const ask="You suggest specific restaurant orders for someone cutting fat while keeping muscle (lifting 4x/week)."+
+    " Area: "+area+". "+(place?"Restaurant: "+place+". Give 3 different orders from that restaurant.":"Suggest 3 orders from 3 different places likely near them"+((S.profile.places||[]).length?" (they like: "+S.profile.places.join(", ")+")":"")+", preferring chains that publish nutrition info.")+
+    (halal?" They eat HALAL only: never pork, bacon, ham, pepperoni or alcohol-based sauces; prefer places known to serve halal meat in "+area+". Set halal to \"certified\" only if the chain or its locations in that area are widely known to be halal-certified, \"options\" if some items or some locations are halal, otherwise \"unclear\". Put what to check in halalNote (e.g. ask if the chicken is halal at this location).":" Halal is not required; set halal to \"unclear\".")+
+    " Budget for this meal: at most "+budget+" kcal, aiming for "+Math.max(25,Math.min(left.p,80))+" g protein; "+(light?"keep it light and high protein.":"carbs about "+Math.max(0,left.c)+" g and fat about "+Math.max(0,left.f)+" g left for the day.")+
+    " Give exact items and sizes with modifications (double protein, sauce on the side, no cheese). Use the restaurant's published nutrition where you know it; kcal must match protein*4+carbs*4+fat*9. Use confidence \"low\" if you are unsure the item exists."+
+    ' Return ONLY JSON: {"orders":[{"place":string,"order":string,"mods":string[],"halal":"certified"|"options"|"unclear"|"no","halalNote":string,"kcal":number,"p":number,"c":number,"f":number,"confidence":"high"|"medium"|"low"}]}';
+  try{const raw=await sample.json(ask,{modelTier:"default"});const {orders,dropped}=TC.parseAiOrders(raw,halal);
+    sgOrders=orders;sgKey=(L.budget)+"|"+halal;$("#sgBody").innerHTML="";
+    st.textContent=orders.length?"Estimates from Claude: menus and halal status vary by location, so check before ordering."+(dropped?" ("+dropped+" suggestion"+(dropped>1?"s":"")+" removed: numbers didn't add up or not halal.)":""):"Couldn't find orders that fit. Try a specific place.";
+    renderOrders(orders);
+  }catch(e){st.textContent=e&&e.code==="rate_limited"?"Too many requests. Try again in a minute.":"Couldn't get suggestions right now."}
+}
+$("#sgMode").addEventListener("click",e=>{const v=e.target.dataset&&e.target.dataset.v;if(v){sgMode=v;$("#sgStatus").textContent="";renderSuggest()}});
+$("#sgScope").addEventListener("click",e=>{const v=e.target.dataset&&e.target.dataset.v;if(v){sgScope=v;sgOrders=null;$("#sgStatus").textContent="";renderSuggest()}});
+$("#sgAsk").addEventListener("click",askOrders);
+$("#sgPlace").addEventListener("keydown",e=>{if(e.key==="Enter")askOrders()});
 
 /* ---- Past days (Progress tab) ---- */
 let hiDays=14, hiOpen=null;
@@ -1662,7 +1741,7 @@ function renderMe(){
   const p=S.profile;$("#pSex").value=p.sex;$("#pAge").value=p.age||"";$("#pUnits").value=p.units;$("#pWeight").value=p.weightKg?wOut(p.weightKg):"";
   $("#pAct").value=String(p.act);$("#pRun").value=String(p.run);$("#pGoal").value=p.goal;fillRates();const dp=$("#pDayPick");dp.innerHTML="";const pl=planDays();
   WEEK.forEach(d=>dp.append(el("button",{class:"wd",style:"cursor:pointer;font:inherit;color:"+(pl.includes(d)?"var(--surface)":"inherit")+";background:"+(pl.includes(d)?"var(--accent)":"var(--surface)"),"aria-pressed":pl.includes(d)?"true":"false",onclick:()=>togglePlan(d)},el("b",{},d.slice(0,2)))));
-  $("#pCarry").checked=p.carry!==false;$("#pGoalW").value=p.goalKg?wOut(p.goalKg):"";$("#pGoalDate").value=p.goalDate||"";$("#pSteps").value=p.stepGoal||"";
+  $("#pCarry").checked=p.carry!==false;$("#pGoalW").value=p.goalKg?wOut(p.goalKg):"";$("#pGoalDate").value=p.goalDate||"";$("#pSteps").value=p.stepGoal||"";$("#pHalal").checked=p.halal!==false;$("#pArea").value=p.area||"";$("#pPlaces").value=(p.places||[]).join(", ");
   if(imp()){$("#pHtLab1").firstChild.textContent="Height (ft)";$("#pHtLab2").hidden=false;const inch=p.heightCm?p.heightCm/2.54:null;$("#pHt1").value=inch?Math.floor(inch/12):"";$("#pHt2").value=inch?Math.round(inch%12):""}
   else{$("#pHtLab1").firstChild.textContent="Height (cm)";$("#pHtLab2").hidden=true;$("#pHt1").value=p.heightCm?Math.round(p.heightCm):""}
 }
@@ -1673,7 +1752,7 @@ function readMe(){const p=S.profile;const wasImp=imp();
   p.heightCm=wasImp?((ht1*12+ht2)*2.54)||p.heightCm:(ht1||p.heightCm);
   if($("#pWeight").value)p.weightKg=wIn($("#pWeight").value);
   if($("#pGoalW").value)p.goalKg=wIn($("#pGoalW").value);
-  p.carry=$("#pCarry").checked;p.goalDate=$("#pGoalDate").value||null;p.stepGoal=+$("#pSteps").value||9000;
+  p.carry=$("#pCarry").checked;p.goalDate=$("#pGoalDate").value||null;p.stepGoal=+$("#pSteps").value||9000;p.halal=$("#pHalal").checked;p.area=$("#pArea").value.trim();p.places=$("#pPlaces").value.split(",").map(x=>x.trim()).filter(Boolean);
   Object.assign(p,{sex:$("#pSex").value,age:+$("#pAge").value||p.age,act:+$("#pAct").value,run:+$("#pRun").value,goal:$("#pGoal").value,rate:+$("#pRate").value,days:planDays().length,units:$("#pUnits").value});
 }
 $("#pSave").addEventListener("click",async()=>{readMe();$("#pStatus").textContent=await save("profile",S.profile);renderAll()});
