@@ -74,3 +74,9 @@ Vite + React 19 + TypeScript + TanStack Query app in apps/web with Store and AiC
 - **Eating out**: pick a saved place or leave it blank for halal-friendly ideas around your area. Claude suggests exact orders with modifications; every response goes through `parseAiOrders` (zod), which drops orders whose calories don't match their macros (4/4/9) and anything not halal. Badges show halal certified / halal options / check halal.
 - **Halal setting** (on by default), area and favourite places on Me. Non-halal foods (pork, bacon, alcohol…) are screened out of suggestions; anything named "halal" passes.
 - Fix: added a global `[hidden]` rule; some panels with inline display styles could show while hidden.
+
+## v23: Brand-aware estimates
+- **Naming a brand or restaurant gets its official numbers.** "Starbucks spinach feta wrap" is detected (`findBrands` in core: ~35 chains and brands, incl. Tim Hortons, McDonald's, Mary Brown's, Osmow's, Costco/Kirkland, Fairlife) and the prompt requires that company's own published nutrition for the exact item and default size, Canadian menu first. Photo estimates also use brands seen on cups, wrappers or packaging.
+- Each item now reports a **source** (official / label / estimate) and a note; the UI shows an "Official" badge and the note is saved on the logged item (`src`). An item claiming to be official whose calories don't match its macros (4/4/9) is downgraded to an estimate.
+- Prompts include up to 3 **similar foods you've logged before** (`relatedFoods`) to anchor vague portions, plus rules for hidden oils and restaurant portions. Prompts now live in core (`describeFoodPrompt`, `photoFoodPrompt`) and are shared by both apps.
+- Limitation: Claude inside the app can't browse, so "official" means Claude's knowledge of the published numbers, not a live lookup.

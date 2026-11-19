@@ -96,3 +96,16 @@ export function searchCatalog(cat: CatalogFood[], q: string): CatalogFood[] {
     .filter((f) => (f.barcode && f.barcode === q.trim()) || words.every((w) => foodKey(f.name).includes(w)))
     .sort((a, b) => b.count - a.count || (b.lastUsed || "").localeCompare(a.lastUsed || ""));
 }
+
+/** Up to `n` catalogue foods that share a meaningful word with a free-text description (most logged first). */
+export function relatedFoods(cat: CatalogFood[], text: string, n = 3): CatalogFood[] {
+  const stop = new Set(["with", "and", "from", "some", "half", "about", "cup", "cups", "slice", "slices", "piece", "pieces", "large", "small", "medium", "grande", "venti", "tall"]);
+  const words = foodKey(text).split(" ").filter((w) => w.length >= 4 && !stop.has(w));
+  if (!words.length) return [];
+  return cat
+    .map((f) => ({ f, hits: words.filter((w) => foodKey(f.name).split(" ").includes(w)).length }))
+    .filter((x) => x.hits > 0)
+    .sort((a, b) => b.hits - a.hits || b.f.count - a.f.count)
+    .slice(0, n)
+    .map((x) => x.f);
+}

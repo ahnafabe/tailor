@@ -1,4 +1,4 @@
-import { AiLabelSchema, AiSleepSchema, parseAiFoodItems, type AiFoodItem } from "@tailor/core";
+import { AiLabelSchema, AiSleepSchema, describeFoodPrompt, findBrands, parseAiFoodItems, photoFoodPrompt, type AiFoodItem, type EstimateContext } from "@tailor/core";
 import type { ClaudeSample } from "./runtime";
 
 /** AI features the app needs. Today: Claude inside the artifact. Later: an ApiAiClient calling our Express server,
@@ -6,13 +6,12 @@ import type { ClaudeSample } from "./runtime";
 export interface AiClient {
   readonly available: boolean;
   readonly images: boolean;
-  estimateFood(description: string): Promise<{ items: AiFoodItem[]; dropped: number }>;
-  estimateMeal(photo: Blob, context: string): Promise<{ items: AiFoodItem[]; dropped: number }>;
+  estimateFood(description: string, ctx?: EstimateContext): Promise<{ items: AiFoodItem[]; dropped: number }>;
+  estimateMeal(photo: Blob, context: string, ctx?: EstimateContext): Promise<{ items: AiFoodItem[]; dropped: number }>;
   readLabel(photo: Blob): Promise<ReturnType<typeof AiLabelSchema.parse> | null>;
   readSleep(photos: Blob[]): Promise<ReturnType<typeof AiSleepSchema.parse> | null>;
 }
 
-const FOOD_JSON = '{"items":[{"name":string,"serving":string,"grams":number,"kcal":number,"p":number,"c":number,"f":number}]}';
 
 export class ClaudeSampleClient implements AiClient {
   private sample: ClaudeSample | null = null;
@@ -32,18 +31,15 @@ export class ClaudeSampleClient implements AiClient {
     return this.sample;
   }
 
-  async estimateFood(description: string) {
-    const raw = await this.need().json(
-      `You are a nutrition database using USDA and Canadian Nutrient File values. Estimate nutrition for what this person ate: "${description.replace(/"/g, "'")}". If no amount is given, assume a typical single portion. Return ONLY JSON: ${FOOD_JSON} with one item per distinct food and values for the whole amount.`,
-      { modelTier: "quick" });
+  /** Brand-aware: "Starbucks spinach feta wrap" asks for Starbucks' published numbers (see core describeFoodPrompt). */
+  async estimateFood(description: string, ctx: EstimateContext = {}) {
+    const brands = ctx.brands ?? findBrands(description);
+    const raw = await this.need().json(describeFoodPrompt(description, { ...ctx, brands }), { modelTier: brands.length ? "default" : "quick" });
     return parseAiFoodItems(raw);
   }
 
-  async estimateMeal(photo: Blob, context: string) {
-    const ctx = context.trim() ? ` The person who ate it adds this context, which overrides what the photo suggests: "${context.replace(/"/g, "'")}".` : "";
-    const raw = await this.need().json(
-      `Estimate the nutrition of the food in this photo using USDA/Canadian Nutrient File values. Estimate portions from visual cues.${ctx} Return ONLY JSON ${FOOD_JSON} with values for the amount actually eaten.`,
-      { images: [photo], modelTier: "default" });
+  async estimateMeal(photo: Blob, context: string, ctx: EstimateContext = {}) {
+    const raw = await this.need().json(photoFoodPrompt(context.trim(), { ...ctx, brands: ctx.brands ?? findBrands(context) }), { images: [photo], modelTier: "default" });
     return parseAiFoodItems(raw);
   }
 

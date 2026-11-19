@@ -72,6 +72,15 @@ await step("eating out: halal orders, bad numbers and pork dropped", async () =>
   assert.match(await p.textContent("#fLog"), /Osmow's: Chicken on the rocks/);
   await p.click('#sgMode button[data-v="mine"]'); assert.equal(await p.isHidden("#sgOut"), true);
 });
+await step("naming a brand asks for its official numbers and shows the source", async () => {
+  await p.fill("#fSearch", "Starbucks spinach feta wrap"); await p.click("#fAsk"); await p.waitForTimeout(200);
+  assert.match(await p.textContent("#fStatus"), /Looked up Starbucks nutrition/);
+  assert.match(await p.textContent("#fResults"), /Official/);
+  assert.match(await p.textContent("#fResults"), /Starbucks Canada published nutrition/);
+  await p.locator("#fResults .cand button.btn").first().click(); await p.waitForTimeout(150);
+  assert.match(await p.textContent("#fLog"), /Spinach & Feta Wrap/);
+  await p.fill("#fSearch", "");
+});
 await step("AI estimate goes through validation", async () => {
   await p.fill("#fSearch", "chicken and rice"); await p.click("#fAsk"); await p.waitForTimeout(150);
   assert.equal(await p.locator("#fResults .cand").count(), 2);

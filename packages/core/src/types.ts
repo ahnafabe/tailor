@@ -12,6 +12,7 @@ export interface FoodItem {
   q: number; // servings eaten
   meal?: string;
   est?: boolean;
+  src?: string; // where the numbers came from, e.g. "Starbucks Canada (official)"
   amt?: number;
   unit?: string;
   bq?: number | null;
