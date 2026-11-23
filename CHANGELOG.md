@@ -80,3 +80,6 @@ Vite + React 19 + TypeScript + TanStack Query app in apps/web with Store and AiC
 - Each item now reports a **source** (official / label / estimate) and a note; the UI shows an "Official" badge and the note is saved on the logged item (`src`). An item claiming to be official whose calories don't match its macros (4/4/9) is downgraded to an estimate.
 - Prompts include up to 3 **similar foods you've logged before** (`relatedFoods`) to anchor vague portions, plus rules for hidden oils and restaurant portions. Prompts now live in core (`describeFoodPrompt`, `photoFoodPrompt`) and are shared by both apps.
 - Limitation: Claude inside the app can't browse, so "official" means Claude's knowledge of the published numbers, not a live lookup.
+
+## v24: Preview next week's workouts
+- Train tab: **This week / Next week** toggle. Next week shows each session's date, exercises, sets × reps and a forecast working weight from your latest logged sets (rounded to a loadable weight; ↑ marks a due increase), plus the block/deload status and planned sets per muscle. The rotation continues from this week's remaining sessions. Read-only: "Do this today" only appears for this week.

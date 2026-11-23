@@ -91,6 +91,17 @@ await step("weekly plan and optional arm day", async () => {
   await p.locator('#weekPanel button:has-text("Do today")').click(); await p.waitForTimeout(100);
   assert.equal(await p.textContent("#woTitle"), "Arm day (optional)");
 });
+await step("preview next week's sessions", async () => {
+  await p.click('#weekPanel button:has-text("Next week")');
+  assert.match(await p.textContent("#weekPanel h2"), /Next week/);
+  assert.match(await p.textContent("#weekPanel"), /A preview/);
+  const view = p.locator('#weekPanel button:has-text("View")');
+  assert.ok((await view.count()) >= 1);
+  await view.first().click();
+  assert.match(await p.textContent("#weekPanel .sheet"), /\d+ × \d+–\d+/);
+  assert.equal(await p.locator('#weekPanel button:has-text("Do this today")').count(), 0);
+  await p.click('#weekPanel button:has-text("This week")');
+});
 await step("motivation flow logs a moment", async () => {
   await p.click("nav.tabs button[data-tab=why]"); await p.click("#sosFood"); await p.waitForTimeout(100);
   await p.click('#sosBody button:has-text("I held the line")'); await p.waitForTimeout(150);

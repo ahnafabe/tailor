@@ -1173,7 +1173,9 @@ function deloadAdvice(){
   if(pain>=5)return "Wrist pain has averaged "+pain.toFixed(1)+"/10 over your last 3 sessions. Take a lighter week.";
   return null;
 }
-function weekDays(){const mon=new Date(weekMon(today())+"T12:00"),plan=planDays(),out=[];let ri=ROT.indexOf(nextSession());
+/* off=0: this week (Mon–Sun). off=1: next week; its rotation picks up after this week's remaining sessions. */
+function weekDays(off=0){const mon=new Date(weekMon(today())+"T12:00"),plan=planDays(),out=[];mon.setDate(mon.getDate()+7*off);
+  let ri=ROT.indexOf(nextSession())+(off?weekDays(0).filter(x=>x.status==="today"||x.status==="upcoming").length:0);
   for(let i=0;i<7;i++){const d=new Date(mon);d.setDate(mon.getDate()+i);const k=dkey(d),w=S.wos[k],past=k<today();
     let session=null,status="rest";
     if(w&&w.done){session=w.session;status="done"}
@@ -1182,46 +1184,57 @@ function weekDays(){const mon=new Date(weekMon(today())+"T12:00"),plan=planDays(
   return out}
 const GROUPS=[["Chest",["chest"],8,14],["Back",["lats","mtrap"],10,16],["Side delts",["sdelt"],6,12],["Rear delts",["rdelt"],6,12],["Biceps",["biceps"],6,12],["Triceps",["triceps"],6,12],["Quads",["quads"],8,14],["Hamstrings",["hams"],8,12],["Glutes",["glutes"],6,12],["Calves",["calves"],6,10],["Core",["abs","obliq","lowback"],6,12]];
 function credit(ex,mus){const h=HOW[ex];if(!h)return 0;if(h.pri.some(m=>mus.includes(m)))return 1;if(h.sec.some(m=>mus.includes(m)))return .5;return 0}
-function weekVolume(){
-  const W=weekDays(),done={},plan={};GROUPS.forEach(g=>{done[g[0]]=0;plan[g[0]]=0});
+function weekVolume(off=0){
+  const W=weekDays(off),done={},plan={};GROUPS.forEach(g=>{done[g[0]]=0;plan[g[0]]=0});
   W.forEach(x=>{const w=S.wos[x.k];
     if(w&&w.sets){const per={};Object.entries(w.sets).forEach(([key,arr])=>{const [ex,sd]=key.split("|");if(sd==="L"&&w.sets[ex+"|R"])return;per[ex]=(per[ex]||0)+(arr||[]).filter(s=>s&&s.ok).length});
       Object.entries(per).forEach(([ex,n])=>GROUPS.forEach(g=>done[g[0]]+=n*credit(ex,g[1])))}
     if(x.session&&(x.status==="today"||x.status==="upcoming")&&!(w&&w.done))planFor(x.session,x.k).forEach(it=>GROUPS.forEach(g=>plan[g[0]]+=it.sets*credit(it.ex,g[1])))});
-  const f=blockInfo(today()).deload?0.5:1;
+  const f=blockInfo(W[0].k).deload?0.5:1;
   return GROUPS.map(([n,m,lo,hi])=>({n,lo:Math.round(lo*f),hi:Math.round(hi*f),done:Math.round(done[n]*2)/2,plan:Math.round(plan[n]*2)/2}));
 }
-let weekOpen=null;
+let weekOpen=null, weekOff=0;
+/* Expected working weight for a lift on a future day, from the latest logged sets (a forecast: this week's sessions can change it). */
+function previewWeight(ex,k){const e=EXS[ex];if(!e)return "";
+  const one=key=>{const last=lastFor(key,"9999-12-31");if(!last)return null;
+    const d=TC.decideProgression({last,baseSets:e.s,lo:e.lo,hi:e.hi,incKg:e.inc?(imp()?liftInc(ex)/KG_LB:e.inc):0,deload:blockInfo(k).deload});
+    if(d.weightKg==null)return null;const step=imp()?2.5:1,w=Math.round(+wOut(d.weightKg)/step)*step;return (d.kind==="increase"?"↑ ":"")+w};/* rounded to a loadable weight */
+  if(e.lr){const r=one(ex+"|R"),l=one(ex+"|L");return r||l?"R "+(r||"?")+" / L "+(l||"?")+" "+wU():""}
+  const w=one(ex);return w?w+" "+wU():"";
+}
 function renderWeek(){
   const host=$("#weekPanel");if(!host)return;host.innerHTML="";
-  const B=blockInfo(today()),W=weekDays(),adv=deloadAdvice();
-  host.append(el("div",{class:"row between"},el("div",{},el("div",{class:"tag"},"Block "+B.num+" · week "+B.week+" of "+BLOCK_LEN),el("h2",{},"This week")),
-    el("span",{class:"pill"+(B.deload?" warn":"")},B.deload?"Deload week":B.ramp?"Build · +1 set on main lifts":"Build")));
+  const W=weekDays(weekOff),B=blockInfo(W[0].k),adv=weekOff?null:deloadAdvice(),next=weekOff===1;
+  const span=W[0].d.toLocaleDateString(undefined,{month:"short",day:"numeric"})+" – "+W[6].d.toLocaleDateString(undefined,{month:"short",day:"numeric"});
+  const seg=el("div",{class:"seg",role:"group","aria-label":"Which week"},...[["This week",0],["Next week",1]].map(([l,v])=>el("button",{type:"button","aria-pressed":String(weekOff===v),onclick:()=>{weekOff=v;weekOpen=null;renderWeek()}},l)));
+  host.append(el("div",{class:"row between"},el("div",{},el("div",{class:"tag"},"Block "+B.num+" · week "+B.week+" of "+BLOCK_LEN+" · "+span),el("h2",{},next?"Next week":"This week")),
+    el("span",{class:"pill"+(B.deload?" warn":"")},B.deload?"Deload week":B.ramp?"Build · +1 set on main lifts":"Build")),seg);
+  if(next)host.append(el("p",{class:"sub",style:"font-size:13px"},"A preview: weights are forecasts from your latest sets, and they'll update as you finish this week's sessions. ↑ means a weight increase is due."));
   host.append(el("p",{class:"sub",style:"font-size:13px"},B.deload?"Half the sets at about 90% of your usual weights, stopping 2–3 reps short. Recovery is where the progress shows up.":"Weeks 1–4 build: weights go up as you hit your reps, and weeks 3–4 add a set to each session's first two lifts. Week 5 is a deload."+(B.num%2===0?" This block rotates in a few different accessories.":"")));
   if(adv)host.append(el("div",{class:"carrynote"},adv+" ",el("button",{class:"linkbtn",onclick:async()=>{const d=new Date(weekMon(today())+"T12:00");d.setDate(d.getDate()-28);S.profile.blockStart=dkey(d);await save("profile",S.profile);renderTrain();renderWeek()}},"Deload this week")));
   const list=el("div",{style:"display:grid;gap:6px"});
   W.forEach(x=>{if(x.status==="rest")return;
     const lab=x.session?SESS[x.session].n:(x.ext?"Trained (logged outside the app)":"Missed");
-    const chip={done:"Done",today:"Today",upcoming:"Upcoming",missed:"Missed"}[x.status];
+    const chip=next?x.d.toLocaleDateString(undefined,{month:"short",day:"numeric"}):{done:"Done",today:"Today",upcoming:"Upcoming",missed:"Missed"}[x.status];
     const open=weekOpen===x.k;
     const row=el("div",{class:"wkrow"+(x.status==="done"?" wkdone":"")},el("div",{class:"wkd"},el("b",{},x.d.toLocaleDateString(undefined,{weekday:"short"})),el("span",{},x.d.getDate())),
       el("div",{style:"min-width:0"},el("div",{style:"font-weight:600"},lab),el("div",{class:"sub",style:"font-size:13px"},x.session?planFor(x.session,x.k).length+" exercises · "+planFor(x.session,x.k).reduce((a,it)=>a+it.sets,0)+" sets":"")),
       el("div",{class:"row",style:"flex-wrap:nowrap"},el("span",{class:"pill"+(x.status==="missed"?" warn":"")},chip),x.session?el("button",{class:"x",onclick:()=>{weekOpen=open?null:x.k;renderWeek()}},open?"Hide":"View"):""));
     list.append(row);
-    if(open&&x.session){const pl=planFor(x.session,x.k);list.append(el("div",{class:"sheet",style:"gap:6px"},pl.map(it=>el("div",{style:"font-size:15px"},EXS[it.ex].n.split(" · ")[0],el("span",{class:"sub",style:"font-size:13px"}," · "+it.sets+" × "+EXS[it.ex].lo+"–"+EXS[it.ex].hi+(it.swapped?" · swapped":"")))),
-      x.status!=="done"?el("div",{class:"row"},el("button",{class:"btn small",onclick:()=>{woManual=true;woSess=x.session;if(S.wos[woKey]&&!S.wos[woKey].done)S.wos[woKey].session=woSess;weekOpen=null;renderTrain();$("#woTitle").scrollIntoView({block:"start"})}},"Do this today")):""))}
+    if(open&&x.session){const pl=planFor(x.session,x.k);list.append(el("div",{class:"sheet",style:"gap:6px"},pl.map(it=>{const pw=x.status!=="done"?previewWeight(it.ex,x.k):"";return el("div",{style:"font-size:15px"},EXS[it.ex].n.split(" · ")[0],el("span",{class:"sub",style:"font-size:13px"}," · "+it.sets+" × "+EXS[it.ex].lo+"–"+EXS[it.ex].hi+(pw?" · "+pw:"")+(it.swapped?" · swapped":"")))}),
+      x.status!=="done"&&!next?el("div",{class:"row"},el("button",{class:"btn small",onclick:()=>{woManual=true;woSess=x.session;if(S.wos[woKey]&&!S.wos[woKey].done)S.wos[woKey].session=woSess;weekOpen=null;renderTrain();$("#woTitle").scrollIntoView({block:"start"})}},"Do this today")):""))}
   });
-  const armDone=W.some(x=>{const w=S.wos[x.k];return w&&w.done&&w.session==="ARM"});
+  const armDone=!next&&W.some(x=>{const w=S.wos[x.k];return w&&w.done&&w.session==="ARM"});
   list.append(el("div",{class:"wkrow"},el("div",{class:"wkd"},el("b",{},"+"),el("span",{},"")),el("div",{},el("div",{style:"font-weight:600"},"Arm day"),el("div",{class:"sub",style:"font-size:13px"},"Optional extra, on any rest day · about 30 min")),
-    el("div",{class:"row",style:"flex-wrap:nowrap"},el("span",{class:"pill"+(armDone?"":" warn")},armDone?"Done":"Optional"),armDone?"":el("button",{class:"x",onclick:()=>{woManual=true;woSess="ARM";if(S.wos[woKey]&&!S.wos[woKey].done)S.wos[woKey].session="ARM";renderTrain();$("#woTitle").scrollIntoView({block:"start"})}},"Do today"))));
+    el("div",{class:"row",style:"flex-wrap:nowrap"},el("span",{class:"pill"+(armDone&&!next?"":" warn")},armDone&&!next?"Done":"Optional"),armDone||next?"":el("button",{class:"x",onclick:()=>{woManual=true;woSess="ARM";if(S.wos[woKey]&&!S.wos[woKey].done)S.wos[woKey].session="ARM";renderTrain();$("#woTitle").scrollIntoView({block:"start"})}},"Do today"))));
   host.append(list);
   // volume
-  const V=weekVolume(),vol=el("div",{style:"display:grid;gap:8px"});
+  const V=weekVolume(weekOff),vol=el("div",{style:"display:grid;gap:8px"});
   V.forEach(v=>{const max=Math.max(v.hi*1.25,v.done+v.plan),pd=v.done/max*100,pp=v.plan/max*100,tot=v.done+v.plan;
     const st=tot<v.lo?"bad":tot>v.hi*1.25?"meh":"ok";
     vol.append(el("div",{class:"vrow"},el("span",{},v.n),el("div",{class:"vtrack"},el("div",{class:"vband",style:"left:"+(v.lo/max*100)+"%;width:"+((v.hi-v.lo)/max*100)+"%"}),el("div",{class:"vdone",style:"width:"+pd+"%"}),el("div",{class:"vplan",style:"left:"+pd+"%;width:"+pp+"%"})),
       el("span",{class:"num "+st,style:"text-align:right;font-size:13px"},v.done+(v.plan?" +"+v.plan:"")+" / "+v.lo+"–"+v.hi)))});
-  host.append(el("h3",{style:"margin-top:6px"},"Sets per muscle this week"),el("p",{class:"sub",style:"font-size:13px"},"Solid = done, light = still planned, shaded band = target for a cut"+(blockInfo(today()).deload?" (halved for the deload)":"")+". Helper muscles count as half a set. The arm day adds biceps, triceps and side delts."+(weekMon(today())<APP_START?" This is a partial first week, so most muscles will read low.":"")),vol);
+  host.append(el("h3",{style:"margin-top:6px"},"Sets per muscle "+(next?"next week":"this week")),el("p",{class:"sub",style:"font-size:13px"},"Solid = done, light = still planned, shaded band = target for a cut"+(B.deload?" (halved for the deload)":"")+". Helper muscles count as half a set. The arm day adds biceps, triceps and side delts."+(!next&&weekMon(today())<APP_START?" This is a partial first week, so most muscles will read low.":"")),vol);
 }
 
 /* ================= Train ================= */
