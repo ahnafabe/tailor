@@ -109,3 +109,8 @@ export function relatedFoods(cat: CatalogFood[], text: string, n = 3): CatalogFo
     .slice(0, n)
     .map((x) => x.f);
 }
+
+/** Fresh copies of logged foods for another day (optionally into a different meal), so edits to one day never touch the other. */
+export function copyItems(items: FoodItem[], meal?: string): FoodItem[] {
+  return items.map((it) => ({ ...(JSON.parse(JSON.stringify(it)) as FoodItem), ...(meal ? { meal } : {}) }));
+}

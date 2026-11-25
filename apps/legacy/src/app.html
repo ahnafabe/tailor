@@ -243,7 +243,8 @@ th{font-size:13px;font-weight:600;color:var(--muted)}
   <section id="tab-food" hidden>
     <div class="panel">
       <div class="row between"><h3>Food log</h3><div class="daynav"><button class="x" id="fPrev" aria-label="Previous day">‹</button><input type="date" id="fDate" style="max-width:160px" aria-label="Log date"><button class="x" id="fNext" aria-label="Next day">›</button></div></div>
-      <div class="row between" id="fPastBar" hidden><span class="sub" id="fDayLab" style="font-size:13px"></span><button class="x" id="fToday">Back to today</button></div>
+      <div class="row between" id="fPastBar" hidden><span class="sub" id="fDayLab" style="font-size:13px"></span><div class="row"><button class="x" id="fCopyDay">Copy day to today</button><button class="x" id="fToday">Back to today</button></div></div>
+      <div class="row" id="fRecent" style="font-size:13px"></div>
       <div id="fSeg"></div>
       <div class="kcalRow"><span class="big" id="fKcal">0</span><span class="sub" id="fKcalOf"></span></div>
       <div class="carrynote" id="fCarry" hidden></div>
@@ -1327,6 +1328,9 @@ function dayLabel(k){const n=Math.round((new Date(today()+"T12:00")-new Date(k+"
 function renderFood(){
   $("#fDate").value=fKey;$("#fNext").disabled=fKey>=today();
   const past=fKey!==today();$("#fPastBar").hidden=!past;$("#fDayLab").textContent="Editing "+dayLabel(fKey);
+  const rc=$("#fRecent");rc.innerHTML="";rc.hidden=past;
+  if(!past){rc.append(el("span",{class:"sub"},"Past days:"));for(let k=prevKey(today()),i=0;i<4;i++,k=prevKey(k)){const kk=k,n=(S.days[k]?.items||[]).length;
+    rc.append(el("button",{class:"x",onclick:()=>setFoodDay(kk)},(i===0?"Yesterday":new Date(k+"T12:00").toLocaleDateString(undefined,{weekday:"short",day:"numeric"}))+(n?" · "+Math.round(totals(S.days[k].items).kcal).toLocaleString()+" kcal":"")))}}
   const r=dayRec(fKey), tg=dayTargets(fKey), tot=totals(r.items);
   $("#fPartial").checked=!!r.partial;
   const pn=$("#fPartialNote");pn.innerHTML="";
@@ -1336,12 +1340,13 @@ function renderFood(){
   const log=$("#fLog");log.innerHTML="";
   ["Breakfast","Lunch","Dinner","Snacks"].forEach(m=>{
     const its=r.items.map((x,i)=>[x,i]).filter(([x])=>x.meal===m);const mt=totals(its.map(a=>a[0]));
-    log.append(el("div",{class:"meal-h"},el("span",{},m),el("span",{},Math.round(mt.kcal)+" kcal")));
-    if(!its.length)log.append(el("div",{class:"sub",style:"padding:6px 0"},"Nothing logged"));
+    const yIts=!past&&!its.length?(S.days[prevKey(fKey)]?.items||[]).filter(x=>x.meal===m):[];
+    log.append(el("div",{class:"meal-h"},el("span",{},m),el("span",{class:"row",style:"gap:8px"},past&&its.length?el("button",{class:"linkbtn",onclick:()=>copyToToday(its.map(a=>a[0]),m.toLowerCase())},"Copy meal to today"):"",Math.round(mt.kcal)+" kcal")));
+    if(!its.length)log.append(el("div",{class:"sub",style:"padding:6px 0"},"Nothing logged",yIts.length?el("span",{}," · ",el("button",{class:"linkbtn",onclick:()=>copyToToday(yIts,"yesterday's "+m.toLowerCase())},"Copy yesterday's "+m.toLowerCase()+" ("+Math.round(totals(yIts).kcal)+" kcal)")):""));
     its.forEach(([x,i])=>{
       const open=editIdx===i;
       log.append(el("div",{class:"item"},el("div",{},el("div",{class:"nm"},x.name,x.est?el("span",{class:"est"}," · est."):""),el("div",{class:"mt"},amtLabel(x)+" · "+Math.round(x.kcal*x.q)+" kcal · P"+r1(x.p*x.q)+" C"+r1(x.c*x.q)+" F"+r1(x.f*x.q))),
-        el("div",{class:"row"},el("button",{class:"x",onclick:()=>{editIdx=open?null:i;renderFood()}},open?"Close":"Edit amount"),el("button",{class:"x",onclick:async()=>{r.items.splice(i,1);editIdx=null;await save("day-"+fKey,r);renderFood();renderToday()}},"Remove"))));
+        el("div",{class:"row"},past?el("button",{class:"x",onclick:()=>copyToToday([x],x.name)},"Copy to today"):"",el("button",{class:"x",onclick:()=>{editIdx=open?null:i;renderFood()}},open?"Close":"Edit amount"),el("button",{class:"x",onclick:async()=>{r.items.splice(i,1);editIdx=null;await save("day-"+fKey,r);renderFood();renderToday()}},"Remove"))));
       if(open){
         const ed=amountEditor(x,null,"le");
         log.append(el("div",{class:"sheet",style:"margin-bottom:8px"},ed.node,el("div",{class:"row"},
@@ -1441,6 +1446,13 @@ async function removeCat(f){
   $("#catStatus").textContent="Removed "+f.name+" from your foods (past logs stay as they were) · "+await save("food-"+id,S.foods[id]);renderCatalog();searchLib();
 }
 $("#catQ").addEventListener("input",()=>{catShow=15;renderCatalog()});
+/* Copy foods from a past day into today (fresh copies, same meals), with undo */
+async function copyToToday(items,what){if(!items.length)return;
+  const t=dayRec(today()),added=TC.copyItems(items);t.items.push(...added);
+  const st=$("#fStatus"),msg=await save("day-"+today(),t);renderFood();renderToday();
+  st.innerHTML="";st.append("Copied "+(items.length===1?what:items.length+" foods ("+what+")")+" to today · "+msg+" ",el("button",{class:"linkbtn",onclick:async()=>{t.items=t.items.filter(x=>!added.includes(x));st.textContent="Undone · "+await save("day-"+today(),t);renderFood();renderToday()}},"Undo"));
+}
+$("#fCopyDay").addEventListener("click",()=>copyToToday(dayRec(fKey).items,"whole day"));
 function setFoodDay(k){fKey=k>today()?today():k;editIdx=null;renderFood()}
 $("#fPrev").addEventListener("click",()=>setFoodDay(prevKey(fKey)));
 $("#fNext").addEventListener("click",()=>setFoodDay(TC.addDays(fKey,1)));

@@ -83,3 +83,8 @@ Vite + React 19 + TypeScript + TanStack Query app in apps/web with Store and AiC
 
 ## v24: Preview next week's workouts
 - Train tab: **This week / Next week** toggle. Next week shows each session's date, exercises, sets × reps and a forecast working weight from your latest logged sets (rounded to a loadable weight; ↑ marks a due increase), plus the block/deload status and planned sets per muscle. The rotation continues from this week's remaining sessions. Read-only: "Do this today" only appears for this week.
+
+## v25: Copy foods between days
+- Food tab: quick "Past days" links (yesterday and the 3 days before, with calories) so earlier days are one tap away.
+- On a past day: **Copy to today** on each food, **Copy meal to today** on each meal, and **Copy day to today** for everything, all with Undo. Copies are independent (`copyItems` in core), so editing one day never changes the other.
+- On today: an empty meal offers **Copy yesterday's lunch** (etc.) when yesterday had that meal.

@@ -1,6 +1,6 @@
 import { test } from "vitest";
 import assert from "node:assert/strict";
-import { adaptive, addDays, countsAsLogged, dayTargets, foodCatalog, foodKey, searchCatalog, type DayLog } from "../src";
+import { adaptive, addDays, copyItems, countsAsLogged, dayTargets, foodCatalog, foodKey, searchCatalog, type DayLog } from "../src";
 import { food, state } from "./helpers";
 
 test("a day marked partial never counts as a full logged day", () => {
@@ -65,4 +65,13 @@ test("catalogue search matches every word, most-logged first", () => {
   assert.deepEqual(searchCatalog(cat, "chick").map((f) => f.name), ["Chicken breast", "Chicken thigh (no skin)"]);
   assert.deepEqual(searchCatalog(cat, "thigh chicken").map((f) => f.name), ["Chicken thigh (no skin)"]);
   assert.equal(foodKey("Chicken thigh (no skin)"), "chicken thigh");
+});
+
+test("copied foods are independent of the originals", () => {
+  const src = [{ ...food(300), name: "Chicken", meal: "Lunch", amt: 200, unit: "g" }];
+  const [c] = copyItems(src);
+  c.q = 3;
+  assert.equal(src[0].q, 1);
+  assert.equal(c.meal, "Lunch");
+  assert.equal(copyItems(src, "Dinner")[0].meal, "Dinner");
 });

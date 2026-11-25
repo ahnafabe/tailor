@@ -44,6 +44,21 @@ await step("step back to yesterday and mark it partly logged", async () => {
   assert.match(await p.textContent("#tCarry"), /−490 kcal/); // logged food is a minimum, so the overage still counts
   await p.click("#fToday"); assert.equal(await p.isHidden("#fPastBar"), true);
 });
+await step("copy foods from a past day to today, with undo", async () => {
+  await p.click("nav.tabs button[data-tab=food]");
+  assert.match(await p.textContent("#fRecent"), /Yesterday · 2,900 kcal/);
+  const before = await p.locator("#fLog .item").count();
+  await p.click('#fRecent button:has-text("Yesterday")');
+  await p.locator('#fLog button:has-text("Copy to today")').first().click(); await p.waitForTimeout(150);
+  assert.match(await p.textContent("#fStatus"), /to today/);
+  await p.click("#fToday"); assert.equal(await p.locator("#fLog .item").count(), before + 1);
+  await p.click('#fStatus button:has-text("Undo")'); await p.waitForTimeout(150);
+  assert.equal(await p.locator("#fLog .item").count(), before);
+  await p.click("#fPrev"); await p.click("#fCopyDay"); await p.waitForTimeout(150);
+  assert.match(await p.textContent("#fStatus"), /whole day/);
+  await p.click('#fStatus button:has-text("Undo")'); await p.waitForTimeout(150);
+  await p.click("#fToday"); assert.equal(await p.locator("#fLog .item").count(), before);
+});
 await step("edit a past day from Progress", async () => {
   await p.click("nav.tabs button[data-tab=body]");
   assert.ok((await p.locator("#hiList > .item").count()) >= 2);
